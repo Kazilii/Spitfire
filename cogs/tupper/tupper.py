@@ -340,8 +340,8 @@ class Tupper(commands.Cog):
 
 		if len(await self.config.user(message.author).get_raw()) > 0:
 			for x in await self.config.user(message.author).get_raw():
-				prefix = self.config.user(message.author).get_raw(x, 'prefix')
-				suffix = self.config.user(message.author).get_raw(x, 'suffix')
+				prefix = await self.config.user(message.author).get_raw(x, 'prefix')
+				suffix = await self.config.user(message.author).get_raw(x, 'suffix')
 				if await self.config.user(message.author).get_raw(x, 'prefix') is None:
 					pass
 				else:
@@ -349,14 +349,11 @@ class Tupper(commands.Cog):
 					if message.content.startswith(
 							await self.config.user(message.author).get_raw(x, 'prefix')) and message.content.endswith(
 							await self.config.user(message.author).get_raw(x, 'suffix')):
-						if len(message.mentions) > 0:
-							if len(message.content) == len(message.mentions[0]):
-								return
 						if message.content.startswith('||') and message.content.endswith('||'):
 							return
 						if message.content.startswith('<') and message.content.endswith('>'):
 							return
-						if message.content.startswith(await prefix + await prefix) and message.content.endswith(await suffix + await suffix):
+						if message.content.startswith(prefix + prefix) and message.content.endswith(suffix + suffix):
 							return
 						hook = await self.bot.get_webhook_info(await chan.id())
 						if await self.config.user(message.author).get_raw(x, 'avatar') is not None:
