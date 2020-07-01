@@ -42,15 +42,15 @@ class Tupper(commands.Cog):
 		"""Tupper management, use the following commands to manage your tulpa."""
 		pass
 
-	@tup.command()
-	async def test(self, ctx):
-		tup = self.config.user(ctx.author)
-		for x in await tup.get_raw():
-			if await tup.get_raw(x, 'prefix') == '{':
-				await ctx.send('Prefix found')
-			else:
-				await ctx.send('Not found')
-
+	#@tup.command()
+	#async def test(self, ctx):
+	#	tup = self.config.user(ctx.author)
+	#	for x in await tup.get_raw():
+	#		if await tup.get_raw(x, 'prefix') == '{':
+	#			await ctx.send('Prefix found')
+	#		else:
+	#			await ctx.send('Not found')
+	#
 	#				if await self.config.user(ctx.author).get_raw(x, y, 'prefix') == '{':
 	#					await ctx.send('Prefix found')
 
@@ -88,6 +88,10 @@ class Tupper(commands.Cog):
 
 		if proxy == '||text||':
 			await ctx.send('That proxy is recognized by Discord as the spoiler tag, as such it is invalid.')
+			return
+
+		if proxy.startswith('<') and proxy.endswith('>'):
+			await ctx.send('That proxy is recognized by Discord for various formatting purposes, as such it is invalid')
 			return
 
 		head, sep, tail = proxy.partition('text')
@@ -236,7 +240,10 @@ class Tupper(commands.Cog):
 		"""Change the name of a Tulpa."""
 		tup = self.config.user(ctx.author)
 		for x in await tup.get_raw():
-			if newname.endswith(x):
+			if newname == x:
+				await ctx.send("You need to supply a new name! Example: `%tup name NEWNAME OLDNAME`")
+				return
+			elif newname.endswith(x):
 				for y in await tup.get_raw(x):
 					await tup.set_raw(newname.rstrip(x).rstrip(' '), y, value=await tup.get_raw(x, y))
 				await tup.set_raw(newname.rstrip(x).rstrip(' '), 'name', value=newname.rstrip(x))
@@ -333,6 +340,8 @@ class Tupper(commands.Cog):
 
 		if len(await self.config.user(message.author).get_raw()) > 0:
 			for x in await self.config.user(message.author).get_raw():
+				prefix = self.config.user(message.author).get_raw(x, 'prefix')
+				suffix = self.config.user(message.author).get_raw(x, 'suffix')
 				if await self.config.user(message.author).get_raw(x, 'prefix') is None:
 					pass
 				else:
@@ -344,6 +353,10 @@ class Tupper(commands.Cog):
 							if len(message.content) == len(message.mentions[0]):
 								return
 						if message.content.startswith('||') and message.content.endswith('||'):
+							return
+						if message.content.startswith('<') and message.content.endswith('>'):
+							return
+						if message.content.startswith(await prefix + await prefix) and message.content.endswith(await suffix + await suffix):
 							return
 						hook = await self.bot.get_webhook_info(await chan.id())
 						if await self.config.user(message.author).get_raw(x, 'avatar') is not None:
